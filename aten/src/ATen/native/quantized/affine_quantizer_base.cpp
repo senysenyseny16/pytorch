@@ -118,10 +118,10 @@ uint8_t quantize_val_arm(
     const float scale,
     const int32_t zero_point,
     const float value) {
-  const int32_t qmin = std::numeric_limits<uint8_t>::min();
-  const int32_t qmax = std::numeric_limits<uint8_t>::max();
+  constexpr int32_t qmin = std::numeric_limits<uint8_t>::min();
+  constexpr int32_t qmax = std::numeric_limits<uint8_t>::max();
   float inv_scale = 1.0f / scale;
-  auto r = zero_point + static_cast<int32_t>(Round(value * inv_scale));
+  auto r = static_cast<int32_t>(zero_point + Round(value * inv_scale));
   r = std::max(r, qmin);
   r = std::min(r, qmax);
   return static_cast<uint8_t>(r);
