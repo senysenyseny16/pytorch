@@ -11,8 +11,8 @@ from torch.testing._internal.common_utils import \
     (TestCase, run_tests, TEST_NUMPY, TEST_LIBROSA, TEST_MKL)
 from torch.testing._internal.common_device_type import \
     (instantiate_device_type_tests, ops, dtypes, onlyOnCPUAndCUDA,
-     skipCPUIfNoMkl, skipCPUIfNoFFT, skipCUDAIfRocm, deviceCountAtLeast,
-     onlyCUDA, OpDTypes, skipIf)
+     skipCPUIfNoFFT, skipCUDAIfRocm, deviceCountAtLeast, onlyCUDA,
+     OpDTypes, skipIf)
 from torch.testing._internal.common_methods_invocations import spectral_funcs
 
 from setuptools import distutils
@@ -280,7 +280,7 @@ class TestFFT(TestCase):
                 self.assertEqual(actual, expected, exact_dtype=exact_dtype)
 
     @skipCUDAIfRocm
-    @skipCPUIfNoMkl
+    @skipCPUIfNoFFT
     @onlyOnCPUAndCUDA
     @dtypes(torch.float, torch.double, torch.complex64, torch.complex128)
     def test_fftn_round_trip(self, device, dtype):
@@ -345,7 +345,7 @@ class TestFFT(TestCase):
     # NOTE: 2d transforms are only thin wrappers over n-dim transforms,
     # so don't require exhaustive testing.
 
-    @skipCPUIfNoMkl
+    @skipCPUIfNoFFT
     @skipCUDAIfRocm
     @onlyOnCPUAndCUDA
     @dtypes(torch.double, torch.complex128)
@@ -390,7 +390,7 @@ class TestFFT(TestCase):
                     self.assertEqual(actual, expected)
 
     @skipCUDAIfRocm
-    @skipCPUIfNoMkl
+    @skipCPUIfNoFFT
     @onlyOnCPUAndCUDA
     @dtypes(torch.float, torch.complex64)
     def test_fft2_fftn_equivalence(self, device, dtype):
@@ -427,7 +427,7 @@ class TestFFT(TestCase):
 
                 self.assertEqual(actual, expect)
 
-    @skipCPUIfNoMkl
+    @skipCPUIfNoFFT
     @onlyOnCPUAndCUDA
     def test_fft2_invalid(self, device):
         a = torch.rand(10, 10, 10, device=device)
@@ -517,7 +517,7 @@ class TestFFT(TestCase):
                 actual = torch_fn(input, dim=dim)
                 self.assertEqual(actual, expected)
 
-    @skipCPUIfNoMkl
+    @skipCPUIfNoFFT
     @onlyOnCPUAndCUDA
     @unittest.skipIf(not TEST_NUMPY, 'NumPy not found')
     @dtypes(torch.float, torch.double)
@@ -597,7 +597,7 @@ class TestFFT(TestCase):
         _test_complex((30, 55, 50, 22), 3, lambda x: x[:, 3:53, 15:40, 1:21])
 
     @skipCUDAIfRocm
-    @skipCPUIfNoMkl
+    @skipCPUIfNoFFT
     @onlyOnCPUAndCUDA
     @dtypes(torch.double)
     def test_fft_ifft_rfft_irfft(self, device, dtype):
@@ -676,7 +676,7 @@ class TestFFT(TestCase):
                         self.assertEqual(torch.backends.cuda.cufft_plan_cache.max_size, 11)  # default is cuda:1
 
     # passes on ROCm w/ python 2.7, fails w/ python 3.6
-    @skipCPUIfNoMkl
+    @skipCPUIfNoFFT
     @onlyOnCPUAndCUDA
     @dtypes(torch.double)
     def test_stft(self, device, dtype):
@@ -745,7 +745,7 @@ class TestFFT(TestCase):
 
     @skipCUDAIfRocm
     @onlyOnCPUAndCUDA
-    @skipCPUIfNoMkl
+    @skipCPUIfNoFFT
     @dtypes(torch.double, torch.cdouble)
     def test_complex_stft_roundtrip(self, device, dtype):
         test_args = list(product(
@@ -788,7 +788,7 @@ class TestFFT(TestCase):
 
     @skipCUDAIfRocm
     @onlyOnCPUAndCUDA
-    @skipCPUIfNoMkl
+    @skipCPUIfNoFFT
     @dtypes(torch.double, torch.cdouble)
     def test_stft_roundtrip_complex_window(self, device, dtype):
         test_args = list(product(
@@ -829,7 +829,7 @@ class TestFFT(TestCase):
 
 
     @skipCUDAIfRocm
-    @skipCPUIfNoMkl
+    @skipCPUIfNoFFT
     @dtypes(torch.cdouble)
     def test_complex_stft_definition(self, device, dtype):
         test_args = list(product(
@@ -850,7 +850,7 @@ class TestFFT(TestCase):
 
     @skipCUDAIfRocm
     @onlyOnCPUAndCUDA
-    @skipCPUIfNoMkl
+    @skipCPUIfNoFFT
     @dtypes(torch.cdouble)
     def test_complex_stft_real_equiv(self, device, dtype):
         test_args = list(product(
@@ -884,7 +884,7 @@ class TestFFT(TestCase):
             self.assertEqual(expected, actual)
 
     @skipCUDAIfRocm
-    @skipCPUIfNoMkl
+    @skipCPUIfNoFFT
     @dtypes(torch.cdouble)
     def test_complex_istft_real_equiv(self, device, dtype):
         test_args = list(product(
@@ -910,7 +910,7 @@ class TestFFT(TestCase):
                                  return_complex=True)
             self.assertEqual(expected, actual)
 
-    @skipCPUIfNoMkl
+    @skipCPUIfNoFFT
     def test_complex_stft_onesided(self, device):
         # stft of complex input cannot be onesided
         for x_dtype, window_dtype in product((torch.double, torch.cdouble), repeat=2):
@@ -932,14 +932,14 @@ class TestFFT(TestCase):
 
     # stft is currently warning that it requires return-complex while an upgrader is written
     @onlyOnCPUAndCUDA
-    @skipCPUIfNoMkl
+    @skipCPUIfNoFFT
     def test_stft_requires_complex(self, device):
         x = torch.rand(100)
         y = x.stft(10, pad_mode='constant')
         # with self.assertRaisesRegex(RuntimeError, 'stft requires the return_complex parameter'):
         #     y = x.stft(10, pad_mode='constant')
 
-    @skipCPUIfNoMkl
+    @skipCPUIfNoFFT
     def test_fft_input_modification(self, device):
         # FFT functions should not modify their input (gh-34551)
 
@@ -961,7 +961,7 @@ class TestFFT(TestCase):
 
     @skipCUDAIfRocm
     @onlyOnCPUAndCUDA
-    @skipCPUIfNoMkl
+    @skipCPUIfNoFFT
     @dtypes(torch.double)
     def test_istft_round_trip_simple_cases(self, device, dtype):
         """stft -> istft should recover the original signale"""
@@ -975,7 +975,7 @@ class TestFFT(TestCase):
 
     @skipCUDAIfRocm
     @onlyOnCPUAndCUDA
-    @skipCPUIfNoMkl
+    @skipCPUIfNoFFT
     @dtypes(torch.double)
     def test_istft_round_trip_various_params(self, device, dtype):
         """stft -> istft should recover the original signale"""
@@ -1180,7 +1180,7 @@ class TestFFT(TestCase):
 
     @skipCUDAIfRocm
     @onlyOnCPUAndCUDA
-    @skipCPUIfNoMkl
+    @skipCPUIfNoFFT
     def test_batch_istft(self, device):
         original = torch.tensor([
             [[4., 0.], [4., 0.], [4., 0.], [4., 0.], [4., 0.]],
@@ -1261,7 +1261,7 @@ def generate_doc_test(doc_test):
             runner.summarize()
             self.fail('Doctest failed')
 
-    setattr(TestFFTDocExamples, 'test_' + doc_test.name, skipCPUIfNoMkl(test))
+    setattr(TestFFTDocExamples, 'test_' + doc_test.name, skipCPUIfNoFFT(test))
 
 for doc_test in FFTDocTestFinder().find(torch.fft, globs=dict(torch=torch)):
     generate_doc_test(doc_test)
